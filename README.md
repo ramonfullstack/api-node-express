@@ -30,6 +30,8 @@ Copiar código
 npm start
 O servidor será executado na porta 3000 por padrão. Você pode acessá-lo em http://localhost:3000.
 
+Deve ser instalado também as dependencias, npm install sqlite3 sequelize sequelize-cli
+
 Endpoints
 1. Listar todas as tarefas
 GET /tasks
