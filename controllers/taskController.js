@@ -34,8 +34,8 @@ const createTask = async (req, res) => {
 };
 
 const updateTask = async (req, res) => {
-  const { id } = req.body.id;
-  const { title, description } = req.body;
+  const id = req.params.id
+  const { id2, title, description } = req.body;
   try {
     const task = await Task.findByPk(id);
     if (task) {
