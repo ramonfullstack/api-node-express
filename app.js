@@ -5,13 +5,16 @@ const Task = require('./models/taskModelDb')
 
 app.use(express.json());
 
-Task.sync()
-  .then(() => {
+async function startDatabase() {
+  try {
+    await Task.sync();
     console.log('Banco de dados sincronizado!');
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('Erro ao sincronizar o banco de dados:', err);
-  });
+  }
+}
+
+startDatabase();
 
 app.use('/tasks', taskRoutes);
 
