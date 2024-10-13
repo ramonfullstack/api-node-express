@@ -1,11 +1,7 @@
 const request = require('supertest');
 const app = require('../app');
 const { Task } = require('../models/taskModelDb');
-
-// Sincroniza o banco de dados antes de todos os testes
-beforeAll(async () => {
-  await Task.sync({ force: true });
-});
+const { default: expect } = require('expect');
 
 jest.mock('../models/taskModelDb', () => ({
   Task: {
@@ -14,21 +10,37 @@ jest.mock('../models/taskModelDb', () => ({
   }
 }));
 
+let server;
+
+beforeAll((done) => {
+  server = app.listen(3001, done);
+});
+
+afterAll((done) => {
+  server.close(done); 
+});
+
 describe('PUT /tasks', () => {
   it('deve atualizar a tarefa existente', async () => {
     const mockTask = {
-      id: 10,
+      id: 1,
       title: 'Fazer bolo',
       description: 'Bolo de chocolate',
       save: jest.fn(),
     };
 
+    const res_insert = await request(app)
+      .post('/tasks')
+      .send(mockTask)
+    
+    expect(res_insert.statusCode).toEqual(200)
+
     Task.findByPk.mockResolvedValue(mockTask);
 
     const res = await request(app)
-      .put('/tasks')
+      .put('/tasks/1')
       .send({
-        id: 10,
+        id: 1,
         title: 'Fazer bolo atualizado',
         description: 'Atualizando descrição',
       });
@@ -42,14 +54,13 @@ describe('PUT /tasks', () => {
     Task.findByPk.mockResolvedValue(null);
 
     const res = await request(app)
-      .put('/tasks/999')
+      .put('/tasks/999')  // ID que não existe
       .send({
         id: 999,
         title: 'Tarefa não existente',
         description: 'Tentando atualizar tarefa que não existe',
       });
 
-    console.log(res.statusCode)
     expect(res.statusCode).toEqual(404);
     expect(res.body).toHaveProperty('error', 'Tarefa não encontrada');
   });
@@ -58,9 +69,9 @@ describe('PUT /tasks', () => {
     Task.findByPk.mockRejectedValue(new Error('Erro no banco de dados'));
 
     const res = await request(app)
-      .put('/tasks')
+      .put('/tasks/1')
       .send({
-        id: 10,
+        id: 1,
         title: 'Erro ao atualizar',
         description: 'Erro ao atualizar descrição',
       });
